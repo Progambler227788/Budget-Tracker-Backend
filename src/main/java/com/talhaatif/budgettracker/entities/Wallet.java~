@@ -1,0 +1,17 @@
+package com.talhaatif.budgetTracker.entities.user;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Wallet {
+
+    private double balance;
+    private String currencyType;
+}

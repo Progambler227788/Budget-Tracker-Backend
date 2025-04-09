@@ -1,0 +1,4 @@
+package com.talhaatif.budgettracker.constants;
+
+public class ErrorCodes {
+}

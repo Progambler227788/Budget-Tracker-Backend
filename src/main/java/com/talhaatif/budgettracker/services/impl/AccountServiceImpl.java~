@@ -1,0 +1,4 @@
+package com.talhaatif.budgettracker.services.impl;
+
+public class AccountServiceImpl {
+}

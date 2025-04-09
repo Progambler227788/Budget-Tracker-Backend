@@ -1,0 +1,4 @@
+package com.talhaatif.budgettracker.repositories;
+
+public class AccountRepository {
+}

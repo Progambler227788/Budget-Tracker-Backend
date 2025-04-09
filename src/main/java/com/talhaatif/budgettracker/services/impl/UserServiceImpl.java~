@@ -1,0 +1,31 @@
+package com.talhaatif.budgettracker.services.impl;
+
+import com.talhaatif.budgettracker.entities.User;
+import com.talhaatif.budgettracker.repositories.UserRepository;
+import com.talhaatif.budgettracker.services.UserService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepo;
+
+    public UserServiceImpl(UserRepository userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    @Override
+    public User register(User user) {
+        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedBy("SYSTEM");
+        return userRepo.save(user);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepo.findByEmail(email);
+    }
+}
