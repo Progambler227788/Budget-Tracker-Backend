@@ -5,7 +5,7 @@ public final class ErrorCodes {
     private ErrorCodes() {
         // Prevent instantiation
     }
-
+    public static final String ERROR = "error";
     public static final String INTERNAL_SERVER_ERROR = "500";
     public static final String BAD_REQUEST = "400";
     public static final String NOT_FOUND = "404";

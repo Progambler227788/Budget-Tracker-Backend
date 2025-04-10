@@ -4,6 +4,7 @@ package com.talhaatif.budgettracker.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Set;
 
@@ -15,10 +16,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Category {
-
+    //    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator") deprecated
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     private String id;
 
     @Column(nullable = false)

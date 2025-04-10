@@ -17,13 +17,13 @@ Validate the token for expiration and authenticity.
 public class JwtUtil {
 
     @Value("${secret.key}")
-    private String SECRET_KEY;
+    private String secretKey;
 
 
-    private final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
+    private static final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     // Generate token using username instead of email

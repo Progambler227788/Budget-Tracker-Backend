@@ -1,6 +1,7 @@
 package com.talhaatif.budgettracker.security;
 
 import com.talhaatif.budgettracker.config.RateLimitingFilter;
+import com.talhaatif.budgettracker.repositories.UserRepository;
 import com.talhaatif.budgettracker.services.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,7 @@ public class SecurityConfig {
     private final RateLimitingFilter rateLimitingFilter;
 
     private final PasswordEncoder passwordEncoder;
+
 
 
     public SecurityConfig(RateLimitingFilter rateLimitingFilter, JwtFilter jwtFilter, PasswordEncoder passwordEncoder) {
