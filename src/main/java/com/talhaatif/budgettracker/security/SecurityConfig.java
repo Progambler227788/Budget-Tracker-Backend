@@ -1,7 +1,7 @@
 package com.talhaatif.budgettracker.security;
 
 import com.talhaatif.budgettracker.config.RateLimitingFilter;
-import com.talhaatif.budgettracker.services.UserDetailsServiceImpl;
+import com.talhaatif.budgettracker.services.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,7 +50,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserDetailsServiceImpl(); // Ensure UserInfoService implements UserDetailsService
+        return new UserDetailsServiceImpl();
     }
 
 

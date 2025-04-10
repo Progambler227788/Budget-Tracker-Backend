@@ -34,14 +34,7 @@ public class Budget {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @Column(nullable = false)
-    private BigDecimal totalPlanned;  // Total budget amount
 
-    @Column(nullable = false)
-    private BigDecimal totalIncome;   // Aggregated income
-
-    @Column(nullable = false)
-    private BigDecimal totalExpense;  // Aggregated expense
 
     @Column(nullable = false)
     private BigDecimal currentBalance; // Calculated: totalIncome - totalExpense
@@ -56,13 +49,5 @@ public class Budget {
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Transaction> transactions;
 
-    // Helper method to update aggregates
-    public void updateAggregates(Transaction transaction) {
-        if (transaction.getType() == Transaction.TransactionType.INCOME) {
-            this.totalIncome = this.totalIncome.add(transaction.getAmount());
-        } else if (transaction.getType() == Transaction.TransactionType.EXPENSE) {
-            this.totalExpense = this.totalExpense.add(transaction.getAmount());
-        }
-        this.currentBalance = this.totalIncome.subtract(this.totalExpense);
-    }
+
 }

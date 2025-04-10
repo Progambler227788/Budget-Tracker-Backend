@@ -27,9 +27,9 @@ public class JwtUtil {
     }
 
     // Generate token using username instead of email
-    public String generateToken(String username, String role) {
+    public String generateToken(String email, String role) {
         return Jwts.builder()
-                .setSubject(username) // Now using username
+                .setSubject(email) // Email
                 .claim("role", role ) // Include role as claim
                 .setIssuedAt(new Date()) // issue time, creation time
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
@@ -39,7 +39,7 @@ public class JwtUtil {
 
 
     //  Extract username from token
-    public String extractUserName(String token) {
+    public String extractEmail(String token) {
         return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
                 .parseClaimsJws(token).getBody().getSubject();
     }
