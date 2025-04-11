@@ -15,4 +15,5 @@ public interface UserService {
     void assignRoles(String userId, Set<String> roles);
     Set<String> getUserRoles(String userId);
     boolean isAdmin(String userId);
+    boolean existsByEmail(String email);
 }
