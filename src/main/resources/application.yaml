@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: budgetTracker
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}  # Will use value from environment
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update  # Changed from create-drop to preserve data
+    show-sql: true
+jwt:
+  refreshExpirationMs: 604800000
+
+secret:
+  key: ${SECRET_KEY}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enable: true
+  show-actuator: true
+  packages-to-scan: com.talhaatif.ticketbook.controllers
+
+
+swagger:
+  api:
+    title: "🎟️ Budget Tracker API"
+    version: "1.0.0"
+    description: |
+      # Budget-Tracker-Backend 💰
+      
+      This API allows users to manage their personal finances securely using JWT authentication.
+      
+      🔹 **Current Features:**
+      - 💼 Users can create, update, delete, and view transactions
+      - 📊 Track income and expenses with detailed categorization
+      - 💰 Monitor account balances and financial history
+      - 🔐 Secure login & signup with JWT authentication
+      - 🔍 Filter transactions by date, category, and type
+      - 📈 View spending analytics and summaries
+      - ⏳ Rate limiting implemented to prevent abuse
+      
+      **Usage:**
+      - Register using the signup API endpoint
+      - Authenticate using the login API endpoint
+      - Click on the **Authorize** button in Swagger UI
+      - Enter the JWT token to access secured endpoints
+      
+      **API Security:**
+      - All endpoints are secured with JWT authentication
+      - Passwords are securely hashed
+      - User data is isolated and protected
+
+
+

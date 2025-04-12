@@ -9,7 +9,8 @@ import java.util.Map;
 
 public interface AuthService {
 
-    ResponseEntity<?> refreshToken(String refreshToken);
+    ResponseEntity<TokenResponse> refreshToken(String refreshToken);
+    void logoutUser(String email);
 
 
     ResponseEntity<TokenResponse> authenticateUser(LoginRequest loginRequest);

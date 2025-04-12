@@ -36,23 +36,18 @@ public class SecurityConfig {
 
     // Constructor Base Injection
     private final JwtFilter authFilter;
-
     private final RateLimitingFilter rateLimitingFilter;
-
+    private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-
-
-    public SecurityConfig(RateLimitingFilter rateLimitingFilter, JwtFilter jwtFilter, PasswordEncoder passwordEncoder) {
+    public SecurityConfig(RateLimitingFilter rateLimitingFilter,
+                          JwtFilter jwtFilter,
+                          UserDetailsServiceImpl userDetailsService,
+                          PasswordEncoder passwordEncoder) {
         this.rateLimitingFilter = rateLimitingFilter;
         this.authFilter = jwtFilter;
+        this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-    }
-
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new UserDetailsServiceImpl();
     }
 
 
@@ -90,12 +85,13 @@ public class SecurityConfig {
     }
 
 
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
-        return authenticationProvider;
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
     }
 
 }

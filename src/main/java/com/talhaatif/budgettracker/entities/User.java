@@ -34,6 +34,10 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false, unique = true)
+    private String userName;
+
+
     @Column(nullable = false)
     private String password;
 
@@ -50,14 +54,19 @@ public class User implements UserDetails {
     // Spring Security UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 
+
     @Override
     public String getUsername() {
-        return this.email; // Using email as username
+        return this.userName;
+    }
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override

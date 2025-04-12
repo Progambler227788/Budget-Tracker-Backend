@@ -6,6 +6,7 @@ import java.util.Set;
 public record UserResponse(
         String id,
         String email,
+        String userName,
         String firstName,
         String lastName,
         Set<String> roles,

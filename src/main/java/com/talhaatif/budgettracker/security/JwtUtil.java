@@ -21,17 +21,17 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateAccessToken(String email, String role) {
-        return buildToken(email, role, ACCESS_TOKEN_EXPIRATION);
+    public String generateAccessToken(String userName, String role) {
+        return buildToken(userName, role, ACCESS_TOKEN_EXPIRATION);
     }
 
-    public String generateRefreshToken(String email) {
-        return buildToken(email, null, REFRESH_TOKEN_EXPIRATION);
+    public String generateRefreshToken(String userName) {
+        return buildToken(userName, null, REFRESH_TOKEN_EXPIRATION);
     }
 
-    private String buildToken(String email, String role, long expiration) {
+    private String buildToken(String userName, String role, long expiration) {
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(userName)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -39,7 +39,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String extractEmail(String token) {
+    public String extractUserName(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

@@ -5,12 +5,14 @@ import com.talhaatif.budgettracker.entities.User;
 import com.talhaatif.budgettracker.repositories.UserRepository;
 import com.talhaatif.budgettracker.services.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -18,11 +20,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
     private final AccountServiceImpl accountService;
 
-    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepo, AccountServiceImpl accountService) {
+    public UserServiceImpl(UserRepository userRepo, AccountServiceImpl accountService, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.accountService = accountService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -36,8 +39,24 @@ public class UserServiceImpl implements UserService {
         // Rest of your existing register method...
         user.setCreatedAt(LocalDateTime.now());
         user.setCreatedBy("SYSTEM");
-        user.setRoles(Set.of("USER"));
+        // Ensure roles are properly set
+
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            user.setRoles(Set.of("USER"));
+        }
+
+        else {
+            // Clean roles - remove any existing ROLE_ prefix
+            Set<String> cleanedRoles = user.getRoles().stream()
+                    .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
+                    .collect(Collectors.toSet());
+            user.setRoles(cleanedRoles);
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // save user first as account needs user and it is eager to save user first
+        User savedUser = userRepo.save(user);
 
         Account account = Account.builder()
                 .name(user.getFirstName() + " " + user.getLastName() + "'s Account")
@@ -46,14 +65,17 @@ public class UserServiceImpl implements UserService {
                 .totalIncome(BigDecimal.ZERO)
                 .totalExpense(BigDecimal.ZERO)
                 .type(Account.AccountType.CASH)
-                .user(user)
+                .user(savedUser)
                 .build();
 
-        Account savedAccount = accountService.createAccount(account);
-        user.setAccounts(Set.of(savedAccount));
+        accountService.createAccount(account);
 
-        return userRepo.save(user);
+//        savedUser.setAccounts(Set.of(savedAccount));
+
+        // no saving again cascade will handle it for me
+        return savedUser;
     }
+
 
     @Override
     public boolean existsByEmail(String email) {
