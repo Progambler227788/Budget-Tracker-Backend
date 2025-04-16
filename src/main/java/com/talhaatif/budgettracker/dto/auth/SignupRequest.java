@@ -1,6 +1,8 @@
 package com.talhaatif.budgettracker.dto.auth;
 
 import jakarta.validation.constraints.*;
+
+import java.util.List;
 import java.util.Set;
 
 public record SignupRequest(
@@ -23,5 +25,5 @@ public record SignupRequest(
         @NotBlank(message = "Last name cannot be blank")
         String lastName,
 
-        Set<String> roles
+        List<String> roles
 ) {}

@@ -4,22 +4,18 @@ import com.talhaatif.budgettracker.entities.Account;
 import com.talhaatif.budgettracker.entities.User;
 import com.talhaatif.budgettracker.repositories.UserRepository;
 import com.talhaatif.budgettracker.services.UserService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
     private final AccountServiceImpl accountService;
-
     private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(UserRepository userRepo, AccountServiceImpl accountService, PasswordEncoder passwordEncoder) {
@@ -36,24 +32,16 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        // Rest of your existing register method...
+
         user.setCreatedAt(LocalDateTime.now());
         user.setCreatedBy("SYSTEM");
-        // Ensure roles are properly set
+
 
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            user.setRoles(Set.of("USER"));
+            user.setRoles(Arrays.asList("USER"));
         }
 
-        else {
-            // Clean roles - remove any existing ROLE_ prefix
-            Set<String> cleanedRoles = user.getRoles().stream()
-                    .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
-                    .collect(Collectors.toSet());
-            user.setRoles(cleanedRoles);
-        }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // save user first as account needs user and it is eager to save user first
         User savedUser = userRepo.save(user);
@@ -70,7 +58,6 @@ public class UserServiceImpl implements UserService {
 
         accountService.createAccount(account);
 
-//        savedUser.setAccounts(Set.of(savedAccount));
 
         // no saving again cascade will handle it for me
         return savedUser;
@@ -87,13 +74,18 @@ public class UserServiceImpl implements UserService {
     public User addAdmin(User user) {
         user.setCreatedAt(LocalDateTime.now());
         user.setCreatedBy("SYSTEM");
-        user.setRoles(Set.of("ADMIN"));
+        user.setRoles(Arrays.asList("ADMIN"));
         return userRepo.save(user);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepo.findByEmail(email);
+    }
+
+    @Override
+    public User findByUserName(String userName) {
+        return userRepo.findByUserName(userName);
     }
 
     @Override
@@ -107,18 +99,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void assignRoles(String userId, Set<String> roles) {
+    public void assignRoles(String userId, List<String> roles) {
         userRepo.findById(userId).ifPresent(user -> {
             user.setRoles(roles);
             userRepo.save(user);
         });
     }
+    @Override
+    public User updateUser(User user) {
+        return userRepo.save(user);
+    }
 
     @Override
-    public Set<String> getUserRoles(String userId) {
+    public List<String> getUserRoles(String userId) {
         return userRepo.findById(userId)
                 .map(User::getRoles)
-                .orElse(Collections.emptySet());
+                .orElse(Collections.emptyList());
     }
 
 
@@ -128,5 +124,7 @@ public class UserServiceImpl implements UserService {
                 .map(user -> user.getRoles().contains("ADMIN"))
                 .orElse(false);
     }
+
+
 
 }

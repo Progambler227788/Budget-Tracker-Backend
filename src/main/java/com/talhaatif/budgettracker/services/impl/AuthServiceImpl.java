@@ -10,21 +10,18 @@ import com.talhaatif.budgettracker.services.RefreshTokenService;
 import com.talhaatif.budgettracker.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.Token;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,97 +37,51 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<TokenResponse> authenticateUser(LoginRequest loginRequest) {
         try {
-            // Log the attempt
             log.info("Attempting authentication for user: {}", loginRequest.userName());
 
-            // 1. First try authentication
-            Authentication authentication;
-            try {
-                authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                loginRequest.userName(),
-                                loginRequest.password()
-                        )
-                );
-                log.info("Basic authentication successful for user: {}", loginRequest.userName());
-            } catch (Exception e) {
-                log.error("Authentication failed for user: {}", loginRequest.userName(), e);
-                throw new RuntimeException("Authentication failed: " + e.getMessage(), e);
-            }
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.userName(),
+                            loginRequest.password()
+                    )
+            );
 
-            // 2. Verify the principal
-            User user;
-            try {
-                user = (User) authentication.getPrincipal();
-                log.info("User principal retrieved: {}", user.getUsername());
-            } catch (ClassCastException e) {
-                log.error("Principal is not of type User", e);
-                throw new RuntimeException("Invalid user principal type", e);
-            } catch (Exception e) {
-                log.error("Failed to get user principal", e);
-                throw new RuntimeException("Failed to retrieve user details", e);
-            }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 3. Check authorities/roles
-            String role;
-            try {
-                Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-                log.info("User authorities: {}", authorities);
+            User user = (User) authentication.getPrincipal();
+            log.info("User authenticated: {}", user.getUsername());
 
-                if (authorities == null || authorities.isEmpty()) {
-                    log.error("No authorities found for user: {}", user.getUsername());
-                    throw new RuntimeException("User has no roles assigned");
-                }
+            // Handle multiple roles
+            String roles = user.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.joining(",")); // Join multiple roles with comma
 
-                role = authorities.stream()
-                        .findFirst()
-                        .orElseThrow(() -> {
-                            log.error("No roles found in authorities");
-                            return new RuntimeException("No roles found");
-                        })
-                        .getAuthority();
+            String accessToken = jwtUtil.generateAccessToken(user.getUsername(), roles);
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-                log.info("Extracted role: {}", role);
-            } catch (Exception e) {
-                log.error("Failed to process user roles", e);
-                throw new RuntimeException("Role processing failed: " + e.getMessage(), e);
-            }
+            return ResponseEntity.ok(new TokenResponse(
+                    accessToken,
+                    refreshToken.getToken(),
+                    "Bearer",
+                    jwtUtil.getAccessTokenExpiration()
+            ));
 
-            // 4. Token generation
-            try {
-                String accessToken = jwtUtil.generateAccessToken(user.getUsername(), role);
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
-
-                log.info("Successfully generated tokens for user: {}", user.getUsername());
-
-                return ResponseEntity.ok(new TokenResponse(
-                        accessToken,
-                        refreshToken.getToken(),
-                        "Bearer",
-                        jwtUtil.getAccessTokenExpiration()
-                ));
-            } catch (Exception e) {
-                log.error("Token generation failed", e);
-                throw new RuntimeException("Token generation failed: " + e.getMessage(), e);
-            }
-
-        } catch (RuntimeException e) {
-            // This will catch all our custom exceptions
-            log.error("Authentication process failed completely", e);
-            throw e;
+        } catch (Exception e) {
+            log.error("Authentication failed for user: {}", loginRequest.userName(), e);
+            throw new RuntimeException("Authentication failed: " + e.getMessage(), e);
         }
     }
+
     @Override
     public ResponseEntity<TokenResponse> refreshToken(String refreshToken) {
         return refreshTokenService.findByToken(refreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String role = user.getRoles().stream()
-                            .findFirst()
-                            .orElse("USER");
+                    String roles = user.getRoles().stream()
+                            .collect(Collectors.joining(","));
 
-                    String newAccessToken = jwtUtil.generateAccessToken(user.getUsername(), role);
+                    String newAccessToken = jwtUtil.generateAccessToken(user.getUsername(), roles);
                     return ResponseEntity.ok(new TokenResponse(
                             newAccessToken,
                             refreshToken,
@@ -140,6 +91,7 @@ public class AuthServiceImpl implements AuthService {
                 })
                 .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh token is not in database"));
     }
+
 
 
     @Override
@@ -158,11 +110,13 @@ public class AuthServiceImpl implements AuthService {
         user.setLastName(signupRequest.lastName());
 
         // Set default role if none provided
-        Set<String> roles = signupRequest.roles();
+        List<String> roles = signupRequest.roles();
         if (roles == null || roles.isEmpty()) {
-            roles = Collections.singleton("ROLE_USER");
+            user.setRoles(Arrays.asList("USER"));
         }
-        user.setRoles(roles);
+        else {
+            user.setRoles(roles);
+        }
 
         User savedUser = userService.register(user);
 
@@ -183,16 +137,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<UserResponse> updateUserProfile(UpdateRequest updateRequest) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByUserName(userName);
 
-        // Update user fields manually
+
+        // Update user fields
         user.setFirstName(updateRequest.firstName());
         user.setLastName(updateRequest.lastName());
-        // Update other fields as needed
 
-        User updatedUser = userService.register(user);
+        User updatedUser = userService.updateUser(user);
 
         // Convert to response
         UserResponse response = new UserResponse(
@@ -211,9 +164,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void logoutUser(String email) {
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    public void logoutUser(String username) {
+        User user = userService.findByUserName(username);
 
         // Delete all refresh tokens for this user
         refreshTokenService.deleteByUserId(user.getId());

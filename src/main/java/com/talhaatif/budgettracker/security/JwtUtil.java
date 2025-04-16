@@ -21,18 +21,20 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateAccessToken(String userName, String role) {
-        return buildToken(userName, role, ACCESS_TOKEN_EXPIRATION);
+    public String generateAccessToken(String userName, String roles) {
+        return buildToken(userName, roles, ACCESS_TOKEN_EXPIRATION);
     }
+
 
     public String generateRefreshToken(String userName) {
         return buildToken(userName, null, REFRESH_TOKEN_EXPIRATION);
     }
 
-    private String buildToken(String userName, String role, long expiration) {
+
+    private String buildToken(String userName, String roles, long expiration) {
         return Jwts.builder()
                 .setSubject(userName)
-                .claim("role", role)
+                .claim("roles", roles) // Changed from "role" to "roles"
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

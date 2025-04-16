@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,17 +48,20 @@ public class User implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
-    private Set<String> roles;
+    private List<String> roles;
 
-    // Other relationships and audit fields...
 
-    // Spring Security UserDetails methods
+    // ✅ Convert String roles to GrantedAuthority for Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
+
+
+    // Other relationships and audit fields...
+
 
 
     @Override

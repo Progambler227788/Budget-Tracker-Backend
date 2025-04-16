@@ -1,6 +1,7 @@
 package com.talhaatif.budgettracker.dto.auth;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 public record UserResponse(
@@ -9,7 +10,7 @@ public record UserResponse(
         String userName,
         String firstName,
         String lastName,
-        Set<String> roles,
+        List<String> roles,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}
