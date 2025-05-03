@@ -17,11 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Budget {
-
-    @Id
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
-    private String id;
+public class Budget extends BaseEntity {
 
     @Column(nullable = false)
     private String name;
@@ -37,7 +33,7 @@ public class Budget {
 
 
     @Column(nullable = false)
-    private BigDecimal currentBalance; // Calculated: totalIncome - totalExpense
+    private BigDecimal currentBalance;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

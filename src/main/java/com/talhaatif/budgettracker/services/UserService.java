@@ -21,5 +21,7 @@ public interface UserService {
     boolean isAdmin(String userId);
     boolean existsByEmail(String email);
 
+    User getCurrentUserEntity();
+
     User updateUser(User user);
 }

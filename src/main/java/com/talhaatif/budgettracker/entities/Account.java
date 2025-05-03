@@ -1,10 +1,8 @@
 package com.talhaatif.budgettracker.entities;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.UuidGenerator;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -14,29 +12,22 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Account {
-
-    @Id
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
-    private String id;
+@SuperBuilder
+public class Account extends BaseEntity {
 
     @Column(nullable = false)
-    private String name;
+    private String accountName;
 
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalIncome;
 
-
-    @Column(nullable = false)
-    private BigDecimal totalIncome;   // income
-
-    @Column(nullable = false)
-    private BigDecimal totalExpense;  // expense
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalExpense;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,15 +40,10 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Transaction> transactions;
 
-
-
-
     public enum AccountType {
         CASH, BANK_ACCOUNT, CREDIT_CARD, INVESTMENT, LOAN, OTHER
     }
 
-
-    // Helper method to update aggregates
     public void updateAccountAggregates(Transaction transaction) {
         if (transaction.getType() == Transaction.TransactionType.INCOME) {
             this.totalIncome = this.totalIncome.add(transaction.getAmount());

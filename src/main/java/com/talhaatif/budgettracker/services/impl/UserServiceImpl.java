@@ -4,6 +4,7 @@ import com.talhaatif.budgettracker.entities.Account;
 import com.talhaatif.budgettracker.entities.User;
 import com.talhaatif.budgettracker.repositories.UserRepository;
 import com.talhaatif.budgettracker.services.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,12 @@ public class UserServiceImpl implements UserService {
         this.userRepo = userRepo;
         this.accountService = accountService;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public User getCurrentUserEntity() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepo.findByUserName(username);
     }
 
     @Override
@@ -47,7 +54,7 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepo.save(user);
 
         Account account = Account.builder()
-                .name(user.getFirstName() + " " + user.getLastName() + "'s Account")
+                .accountName(user.getFirstName() + " " + user.getLastName() + "'s Account")
                 .description("Primary account")
                 .balance(BigDecimal.ZERO)
                 .totalIncome(BigDecimal.ZERO)

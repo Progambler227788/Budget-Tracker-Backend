@@ -15,15 +15,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
-    //    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator") deprecated
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
-    private String id;
+public class Category extends BaseEntity {
 
     @Column(nullable = false)
-    private String name;
+    private String categoryName;
 
     private String description;
 
@@ -41,7 +36,5 @@ public class Category {
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<BudgetCategory> budgetCategories;
 
-    public enum CategoryType {
-        INCOME, EXPENSE, TRANSFER
-    }
+
 }

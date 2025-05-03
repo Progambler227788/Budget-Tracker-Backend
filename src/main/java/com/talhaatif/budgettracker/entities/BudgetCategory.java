@@ -15,11 +15,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BudgetCategory {
+public class BudgetCategory extends BaseEntity {
 
-    @Id
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
-    private String id;
 
     @Column(nullable = false)
     private BigDecimal allocatedAmount;

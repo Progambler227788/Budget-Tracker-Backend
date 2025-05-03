@@ -14,11 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RefreshToken {
+public class RefreshToken extends BaseEntity{
 
-    @Id
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
-    private String id;
 
     @Column(nullable = false, unique = true)
     private String token;

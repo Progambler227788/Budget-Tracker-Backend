@@ -42,5 +42,20 @@ public class AccountServiceImpl implements AccountService {
     public void deleteAccount(String id) {
         accountRepo.deleteById(id);
     }
+
+    @Override
+    public String getAccountIdByName(String userId, String accountName) {
+        return accountRepo.findByUserIdAndAccountName(userId, accountName)
+                .map(Account::getId)
+                .orElseThrow(() -> new RuntimeException("Account with name '" + accountName + "' not found for user."));
+    }
+
+    @Override
+    public String getFirstAccountIdForUser(String userId) {
+        return accountRepo.findFirstByUserId(userId)
+                .map(Account::getId)
+                .orElseThrow(() -> new RuntimeException("No account found for user."));
+    }
+
 }
 

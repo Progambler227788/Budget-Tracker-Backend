@@ -11,3 +11,8 @@ truncate budget_categories;
 truncate user_roles;
 select * from user_roles;
 select * from users;
+
+drop database ta_management_system;
+use ta_management_system;
+select * from courses;
+select * from ta_assignments;
