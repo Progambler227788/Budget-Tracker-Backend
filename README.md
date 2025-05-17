@@ -10,6 +10,7 @@ This API allows users to manage their personal finances securely using JWT authe
 - 💰 Monitor account balances and financial history
 - 🔐 Secure login & signup with JWT authentication
 - 🔍 Filter transactions by date, category, and type
+- 🔍 Filter transactions by AI
 - 📈 View spending analytics and summaries
 - ⏳ Rate limiting implemented to prevent abuse
 
